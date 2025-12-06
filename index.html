@@ -767,12 +767,29 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
             }
         }
 
+        // Validate filename - only allow safe characters
+        function validateFilename(filename) {
+            // Only allow alphanumeric, dash, underscore, dot
+            const safePattern = /^[a-zA-Z0-9._-]+$/;
+            if (!safePattern.test(filename)) {
+                alert('Invalid filename. Only letters, numbers, dash, underscore, and dot are allowed.');
+                return false;
+            }
+            // Prevent path traversal attempts
+            if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+                alert('Invalid filename. Path separators are not allowed.');
+                return false;
+            }
+            return true;
+        }
+
         // Save file to server
         async function saveFileToServer() {
             if (!currentFile) {
                 // No file open - prompt for filename
                 const filename = prompt('Enter filename (e.g., notes.md):');
                 if (!filename) return;
+                if (!validateFilename(filename)) return;
                 currentFile = { path: '/' + filename };
             }
 
@@ -807,6 +824,7 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
         async function createNewFile() {
             const filename = prompt('Enter filename (e.g., notes.md):');
             if (!filename) return;
+            if (!validateFilename(filename)) return;
             
             try {
                 const response = await fetch(`${API_BASE}/create`, {
@@ -835,6 +853,7 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
         async function createNewFolder() {
             const foldername = prompt('Enter folder name:');
             if (!foldername) return;
+            if (!validateFilename(foldername)) return;
             
             try {
                 const response = await fetch(`${API_BASE}/create`, {
@@ -889,7 +908,9 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
                 $('.file-tree-item').each(function() {
                     const itemText = $(this).text().trim();
                     const filename = currentFile.path.split('/').pop();
-                    if (itemText.includes(filename)) {
+                    // Use exact match - remove icon and whitespace
+                    const itemName = itemText.replace(/^[📁📄]\s*/, '');
+                    if (itemName === filename) {
                         $(this).addClass('active');
                     }
                 });

@@ -97,6 +97,25 @@ router.get('/file', async (req: Request, res: Response) => {
       } as ApiResponse);
     }
 
+    // Check file size limit
+    if (stats.size > config.MAX_FILE_SIZE) {
+      return res.status(413).json({
+        success: false,
+        error: `File too large. Maximum size is ${config.MAX_FILE_SIZE / (1024 * 1024)}MB`
+      } as ApiResponse);
+    }
+
+    // Check file extension if ALLOWED_EXTENSIONS is configured
+    if (config.ALLOWED_EXTENSIONS && config.ALLOWED_EXTENSIONS.length > 0) {
+      const ext = path.extname(absolutePath).toLowerCase();
+      if (!config.ALLOWED_EXTENSIONS.includes(ext)) {
+        return res.status(403).json({
+          success: false,
+          error: `File type not allowed. Allowed types: ${config.ALLOWED_EXTENSIONS.join(', ')}`
+        } as ApiResponse);
+      }
+    }
+
     const content = await fs.readFile(absolutePath, 'utf-8');
     
     res.json({
@@ -139,7 +158,28 @@ router.post('/file', async (req: Request, res: Response) => {
       } as ApiResponse);
     }
 
+    // Check content size limit
+    const contentSize = Buffer.byteLength(content, 'utf-8');
+    if (contentSize > config.MAX_FILE_SIZE) {
+      return res.status(413).json({
+        success: false,
+        error: `Content too large. Maximum size is ${config.MAX_FILE_SIZE / (1024 * 1024)}MB`
+      } as ApiResponse);
+    }
+
     const absolutePath = validatePath(requestedPath);
+
+    // Check file extension if ALLOWED_EXTENSIONS is configured
+    if (config.ALLOWED_EXTENSIONS && config.ALLOWED_EXTENSIONS.length > 0) {
+      const ext = path.extname(absolutePath).toLowerCase();
+      if (!config.ALLOWED_EXTENSIONS.includes(ext)) {
+        return res.status(403).json({
+          success: false,
+          error: `File type not allowed. Allowed types: ${config.ALLOWED_EXTENSIONS.join(', ')}`
+        } as ApiResponse);
+      }
+    }
+
     await fs.writeFile(absolutePath, content, 'utf-8');
     
     const stats = await fs.stat(absolutePath);

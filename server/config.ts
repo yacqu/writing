@@ -8,7 +8,10 @@ const __dirname = dirname(__filename);
 
 export const config: Config = {
   // REQUIRED: Set this to your notes/documents folder
-  BASE_DIR: process.env.BASE_DIR || path.join(process.env.HOME || '', 'Documents', 'notes'),
+  BASE_DIR: process.env.BASE_DIR || 
+    (process.env.HOME 
+      ? path.join(process.env.HOME, 'Documents', 'notes')
+      : path.join(process.cwd(), 'notes')),
   
   // Server settings
   PORT: parseInt(process.env.PORT || '3031', 10),

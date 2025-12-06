@@ -17,12 +17,12 @@ export const validatePath = (requestedPath: string): string => {
   // Remove leading slash to make it relative
   let cleanPath = requestedPath.startsWith('/') ? requestedPath.slice(1) : requestedPath;
   
-  // Normalize and resolve path, removing any parent directory references
-  const normalizedRequest = path.normalize(cleanPath).replace(/^(\.\.(\/|\\|$))+/, '');
-  const absolute = path.resolve(config.BASE_DIR, normalizedRequest);
+  // Resolve the path (this handles .. and . automatically)
+  const absolute = path.resolve(config.BASE_DIR, cleanPath);
   const resolvedBase = path.resolve(config.BASE_DIR);
   
-  // Ensure it's within BASE_DIR
+  // Ensure the resolved path is within BASE_DIR
+  // Check if absolute path starts with base path followed by separator or equals base path
   if (!absolute.startsWith(resolvedBase + path.sep) && absolute !== resolvedBase) {
     throw new SecurityError('Path traversal detected');
   }
