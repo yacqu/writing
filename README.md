@@ -10,20 +10,47 @@ Live version: [Writing](https://josephernest.github.io/writing/).
 
 Installation
 ----
-Just open `index.html` and that's it! There is no server code. Is that so simple? Yes!
+
+### Option 1: Standalone (Browser Only)
+Just open `index.html` in your browser and that's it! There is no server code needed. Is that so simple? Yes!
+
+### Option 2: With File System Integration (NEW!)
+Run the TypeScript server to enable file system access and persistent file editing:
+
+```bash
+# Install dependencies
+npm install
+
+# Start the server (default: ~/Documents/notes)
+npm start
+
+# Or specify a custom directory
+BASE_DIR=/path/to/your/notes npm start
+```
+
+Then open `http://localhost:3031` in your browser.
+
+**Features in server mode:**
+* 📁 File tree sidebar with folder navigation
+* 💾 Save files directly to your file system (Ctrl+S)
+* 📄 Create new files and folders
+* 🔄 Auto-refresh file tree
+* 🔒 Secure: Only accesses files within the configured BASE_DIR
 
 Usage
 ----
 
-* CTRL + D: Toggle display mode
+* CTRL + D: Toggle display mode (split, preview only, editor only)
 
 * CTRL + P: Print or export as PDF
 
-* CTRL + S: Save source code as .MD file
+* CTRL + S: Save file (to filesystem in server mode, or download as .MD in standalone mode)
 
-and a few other commands (change font, etc.) that can be found in:
+* CTRL + SHIFT + O: Open .MD file (standalone mode only)
 
-* CTRL+SHIFT+H or `?` bottom-left icon: Show help
+and a few other commands (change font, dark mode, LaTeX, etc.) that can be found in:
+
+* CTRL+SHIFT+H or `?` top-right icon: Show help
 
 
 Why another Markdown editor? Why not just use StackEdit?
@@ -42,6 +69,33 @@ That's why I decided to make **Writing**:
 * fast rendering (no delay when writing / no flickering of math equations)
 * **just what you need: write, preview, save the code, print or save as PDF, and nothing else**
 * LPWP website, a.k.a. "Landing Page=Working Page", i.e. the first page that you visit on the website is the page *where things actually happen*, that means that there is no annoying welcome page or login page, etc.
+
+Server Architecture (Optional)
+----
+
+The server mode adds a Node.js/TypeScript backend with these components:
+
+* **Express REST API** for file operations (list, read, save, create, delete, rename)
+* **Security middleware** to prevent path traversal attacks and restrict access to BASE_DIR
+* **File tree UI** with sidebar for easy navigation
+* **Auto-save support** with unsaved changes indicator
+
+**API Endpoints:**
+* `GET /api/files?path=<path>` - List directory contents
+* `GET /api/file?path=<path>` - Read file content
+* `POST /api/file` - Save file content
+* `POST /api/create` - Create new file or directory
+* `DELETE /api/file?path=<path>` - Delete file or directory
+* `PUT /api/file` - Rename/move file
+
+**Configuration:**
+Edit `server/config.ts` to customize:
+* `BASE_DIR` - Root directory for file access
+* `PORT` - Server port (default: 3031)
+* `ALLOWED_EXTENSIONS` - Filter allowed file types
+* `ENABLE_DELETE` / `ENABLE_CREATE` - Enable/disable operations
+
+See `design.md` for detailed architecture documentation.
 
 About
 ----
