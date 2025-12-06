@@ -2,3 +2,15 @@
 
 # ignore ds_store files
 .DS_Store
+
+# Node.js
+node_modules/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Environment
+.env
+.env.local
