@@ -51,7 +51,7 @@ app.use(express.static(publicDir));
 
 // Fallback to index.html for SPA
 app.get('*', (req, res) => {
-  res.sendFile(path.join(publicDir, 'index.html'));
+  res.sendFile(path.join(publicDir, 'editor.html'));
 });
 
 // Ensure BASE_DIR exists
