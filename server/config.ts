@@ -1,17 +1,14 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import type { Config } from './types.js';
+import type { Config } from './types';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export const config: Config = {
   // REQUIRED: Set this to your notes/documents folder
-  BASE_DIR: process.env.BASE_DIR || 
-    (process.env.HOME 
-      ? path.join(process.env.HOME, 'Documents', 'notes')
-      : path.join(process.cwd(), 'notes')),
+  BASE_DIR: process.env.BASE_DIR || "/Users/yacqubabdirahman/Repos/Tools/writing/notes",
   
   // Server settings
   PORT: parseInt(process.env.PORT || '3031', 10),

@@ -4,8 +4,8 @@ import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import rateLimit from 'express-rate-limit';
-import { config } from './config.js';
-import filesRouter from './routes/files.js';
+import { config } from './config';
+import filesRouter from './routes/files';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -29,6 +29,8 @@ app.use(limiter);
 // CORS headers for localhost only
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+  console.log('Origin:', origin);
+  console.log('Request URL:', req.url);
   if (origin && (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1'))) {
     res.header('Access-Control-Allow-Origin', origin);
   }

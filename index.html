@@ -439,7 +439,7 @@
             left: 0;
             top: 0;
             bottom: 0;
-            width: 250px;
+            width: 280px;
             background-color: #2C2C2C;
             color: #E0E0E0;
             overflow-y: auto;
@@ -447,60 +447,83 @@
             border-right: 1px solid #424242;
             z-index: 10;
             font-family: sans-serif;
-            font-size: 13px;
+            font-size: 16px;
             transition: transform 0.3s ease;
         }
 
         #file-tree-container.collapsed {
-            transform: translateX(-250px);
+            transform: translateX(-280px);
         }
 
         #file-tree-header {
-            padding: 15px;
+            padding: 12px 15px;
             background-color: #1E1E1E;
             border-bottom: 1px solid #424242;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 10px;
         }
 
         #file-tree-title {
-            font-weight: bold;
-            font-size: 14px;
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 0.3px;
+            flex: 1;
         }
 
         #file-tree-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
         }
 
         #file-tree-actions button {
             background: transparent;
             border: 1px solid #555;
             color: #E0E0E0;
-            padding: 4px 8px;
+            padding: 6px 10px;
             cursor: pointer;
             border-radius: 3px;
-            font-size: 11px;
+            font-size: 13px;
+            transition: all 0.15s ease;
         }
 
         #file-tree-actions button:hover {
             background: #424242;
+            border-color: #666;
+        }
+
+        #file-tree-actions button:active {
+            background: #333;
         }
 
         #file-tree {
             padding: 10px;
+            min-height: 200px;
+        }
+
+        #file-tree:empty::after {
+            content: 'No files found\A\AClick "+ File" to create a new file';
+            white-space: pre;
+            display: block;
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+            font-size: 12px;
         }
 
         .file-tree-item {
-            padding: 5px 8px;
+            padding: 10px 12px;
             cursor: pointer;
-            border-radius: 3px;
-            margin: 2px 0;
+            border-radius: 4px;
+            margin: 3px 0;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 12px;
             user-select: none;
+            font-size: 16px;
+            line-height: 1.5;
+            transition: background-color 0.15s ease;
         }
 
         .file-tree-item:hover {
@@ -509,6 +532,7 @@
 
         .file-tree-item.active {
             background-color: #094771;
+            color: #fff;
         }
 
         .file-tree-item.directory {
@@ -516,8 +540,14 @@
         }
 
         .file-tree-item .icon {
-            width: 16px;
+            width: 24px;
             text-align: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .file-tree-children {
+            /* Child container for nested directories */
         }
 
         .file-tree-indent {
@@ -525,27 +555,25 @@
         }
 
         #toggle-sidebar {
-            position: fixed;
-            left: 10px;
-            top: 10px;
-            background: #424242;
-            border: 1px solid #757575;
-            color: #aaa;
-            padding: 5px 10px;
-            border-radius: 4px;
+            background: transparent;
+            border: 1px solid #555;
+            color: #E0E0E0;
+            padding: 5px 9px;
             cursor: pointer;
-            font-size: 12px;
+            border-radius: 3px;
+            font-size: 14px;
             font-family: sans-serif;
-            z-index: 101;
+            transition: all 0.15s ease;
         }
 
         #toggle-sidebar:hover {
-            background: #525252;
+            background: #424242;
+            border-color: #666;
         }
 
         .with-sidebar #wmd-input,
         .with-sidebar #wmd-preview {
-            margin-left: 250px;
+            margin-left: 280px;
         }
 
         .with-sidebar.sidebar-collapsed #wmd-input,
@@ -554,39 +582,93 @@
         }
 
         #current-file-indicator {
-            position: fixed;
-            top: 10px;
-            left: 270px;
-            background: #424242;
-            color: #E0E0E0;
-            padding: 5px 15px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-family: sans-serif;
-            z-index: 100;
             display: none;
         }
 
-        .with-sidebar #current-file-indicator {
-            display: block;
+        #floating-save-container {
+            position: fixed;
+            top: 15px;
+            right: 100px;
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
         }
 
-        .with-sidebar.sidebar-collapsed #current-file-indicator {
-            left: 20px;
+        .with-sidebar #floating-save-container {
+            display: flex;
+            flex-direction: row;
         }
 
-        #current-file-indicator.unsaved::after {
+        #floating-file-name {
+            display: none;
+            background: rgba(66, 66, 66, 0.95);
+            color: #E0E0E0;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-family: sans-serif;
+            max-width: 400px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        #floating-file-name.unsaved::after {
             content: " •";
             color: #FF5722;
             font-weight: bold;
         }
 
+        #save-file-btn {
+            background: #0E639C;
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-family: sans-serif;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        #save-file-btn:hover {
+            background: #1177BB;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            transform: translateY(-1px);
+        }
+
+        #save-file-btn:active {
+            background: #0D5A8F;
+            transform: translateY(0);
+        }
+
+        #save-file-btn.saved {
+            background: #2E7D32;
+        }
+
+        #save-file-btn.saved:hover {
+            background: #388E3C;
+        }
+
+        .file-path {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         @media print {
+
             #file-tree-container,
             #toggle-sidebar,
             #current-file-indicator {
                 display: none !important;
             }
+
             .with-sidebar #wmd-input,
             .with-sidebar #wmd-preview {
                 margin-left: 0 !important;
@@ -607,12 +689,17 @@
     <!-- <script type="text/javascript" src="jspdf.min.js"></script> -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <input id="openFileInput" type="file" />
-    
+
+    <!-- Floating Save Button -->
+    <div id="floating-save-container">
+        <div id="floating-file-name">No file open</div>
+        <button id="save-file-btn" style="display: none;">💾 Save</button>
+    </div>
+
     <!-- File Tree Sidebar -->
-    <button id="toggle-sidebar" class="unselectable">☰</button>
-    <div id="current-file-indicator"></div>
     <div id="file-tree-container">
         <div id="file-tree-header">
+            <button id="toggle-sidebar" class="unselectable" title="Toggle Sidebar">☰</button>
             <div id="file-tree-title">📁 Files</div>
             <div id="file-tree-actions">
                 <button id="new-file-btn" title="New File">+ File</button>
@@ -622,7 +709,6 @@
         </div>
         <div id="file-tree"></div>
     </div>
-    
     <div id="wmd-button-bar" class="wmd-button-bar"></div>
     <textarea id="wmd-input" class="column wmd-input" spellcheck="false"></textarea>
     <div id="wmd-preview" class="column wmd-preview">
@@ -684,6 +770,10 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
     </div>
 
     <script type="text/javascript">
+        console.log('Main script executing...');
+        console.log('jQuery available:', typeof jQuery !== 'undefined');
+        console.log('$ available:', typeof $ !== 'undefined');
+
         // File System API Integration
         const API_BASE = '/api';
         let currentFile = null;
@@ -693,14 +783,21 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
         // Check if server is available
         async function checkServerAvailable() {
             try {
+                console.log('Checking server availability at:', `${API_BASE}/files`);
                 const response = await fetch(`${API_BASE}/files`);
+                console.log('Server response status:', response.status);
                 serverMode = response.ok;
+                console.log('Server mode:', serverMode);
                 return serverMode;
             } catch (e) {
+                console.error('Server check failed:', e);
                 serverMode = false;
                 return false;
             }
         }
+
+        // Track expanded folders
+        let expandedFolders = new Set();
 
         // Load file tree from server
         async function loadFileTree(path = '/') {
@@ -716,29 +813,69 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
             return [];
         }
 
-        // Render file tree
-        function renderFileTree(files, container, indent = 0) {
-            files.forEach(file => {
-                const item = $('<div>')
-                    .addClass('file-tree-item')
-                    .addClass(file.type)
-                    .css('padding-left', (indent * 20 + 8) + 'px');
-                
-                const icon = file.type === 'directory' ? '📁' : '📄';
-                item.html(`<span class="icon">${icon}</span> ${file.name}`);
-                
-                if (file.type === 'file') {
-                    item.on('click', () => loadFileFromServer('/' + file.name));
-                } else {
-                    // Directory - could expand/collapse in future
-                    item.on('click', () => {
-                        // For now, just visual feedback
-                        console.log('Directory:', file.name);
+        // Render file tree recursively
+        async function renderFileTree(files, container, parentPath = '', indent = 0) {
+            for (const file of files) {
+                // Build the full path for this item
+                const fullPath = parentPath ? `${parentPath}/${file.name}` : `/${file.name}`;
+
+                const item = document.createElement('div');
+                item.className = 'file-tree-item ' + file.type;
+                item.style.paddingLeft = (indent * 20 + 8) + 'px';
+                item.setAttribute('data-path', fullPath);
+
+                if (file.type === 'directory') {
+                    const isExpanded = expandedFolders.has(fullPath);
+                    const arrow = isExpanded ? '▼' : '▶';
+                    item.innerHTML = `<span class="icon">${arrow} 📁</span> ${file.name}`;
+
+                    // Create a container for children
+                    const childContainer = document.createElement('div');
+                    childContainer.className = 'file-tree-children';
+                    if (!isExpanded) {
+                        childContainer.style.display = 'none';
+                    }
+
+                    item.addEventListener('click', async (e) => {
+                        e.stopPropagation();
+
+                        if (expandedFolders.has(fullPath)) {
+                            // Collapse
+                            expandedFolders.delete(fullPath);
+                            item.querySelector('.icon').innerHTML = '▶ 📁';
+                            childContainer.style.display = 'none';
+                        } else {
+                            // Expand
+                            expandedFolders.add(fullPath);
+                            item.querySelector('.icon').innerHTML = '▼ 📁';
+
+                            // Load children if not already loaded
+                            if (childContainer.children.length === 0) {
+                                const children = await loadFileTree(fullPath);
+                                await renderFileTree(children, childContainer, fullPath, indent + 1);
+                            }
+                            childContainer.style.display = 'block';
+                        }
                     });
+
+                    container.appendChild(item);
+                    container.appendChild(childContainer);
+
+                    // If already expanded, load children
+                    if (isExpanded) {
+                        const children = await loadFileTree(fullPath);
+                        await renderFileTree(children, childContainer, fullPath, indent + 1);
+                    }
+                } else {
+                    // File
+                    item.innerHTML = `<span class="icon">📄</span> ${file.name}`;
+                    item.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        loadFileFromServer(fullPath);
+                    });
+                    container.appendChild(item);
                 }
-                
-                container.append(item);
-            });
+            }
         }
 
         // Load file content from server
@@ -746,15 +883,15 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
             try {
                 const response = await fetch(`${API_BASE}/file?path=${encodeURIComponent(path)}`);
                 const result = await response.json();
-                
+
                 if (result.success) {
                     currentFile = {
                         path: result.data.path,
                         content: result.data.content,
                         modified: result.data.modified
                     };
-                    $('#wmd-input').val(result.data.content);
-                    if (editor.refreshPreview !== undefined) {
+                    document.getElementById('wmd-input').value = result.data.content;
+                    if (editor && editor.refreshPreview !== undefined) {
                         editor.refreshPreview();
                     }
                     unsavedChanges = false;
@@ -794,7 +931,7 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
             }
 
             try {
-                const content = $('#wmd-input').val();
+                const content = document.getElementById('wmd-input').value;
                 const response = await fetch(`${API_BASE}/file`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -803,7 +940,7 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
                         content: content
                     })
                 });
-                
+
                 const result = await response.json();
                 if (result.success) {
                     unsavedChanges = false;
@@ -825,7 +962,7 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
             const filename = prompt('Enter filename (e.g., notes.md):');
             if (!filename) return;
             if (!validateFilename(filename)) return;
-            
+
             try {
                 const response = await fetch(`${API_BASE}/create`, {
                     method: 'POST',
@@ -835,7 +972,7 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
                         type: 'file'
                     })
                 });
-                
+
                 const result = await response.json();
                 if (result.success) {
                     await refreshFileTree();
@@ -854,7 +991,7 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
             const foldername = prompt('Enter folder name:');
             if (!foldername) return;
             if (!validateFilename(foldername)) return;
-            
+
             try {
                 const response = await fetch(`${API_BASE}/create`, {
                     method: 'POST',
@@ -864,7 +1001,7 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
                         type: 'directory'
                     })
                 });
-                
+
                 const result = await response.json();
                 if (result.success) {
                     await refreshFileTree();
@@ -880,78 +1017,114 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
         // Refresh file tree
         async function refreshFileTree() {
             const files = await loadFileTree('/');
-            const container = $('#file-tree');
-            container.empty();
-            renderFileTree(files, container);
+            const container = document.getElementById('file-tree');
+            container.innerHTML = '';
+            await renderFileTree(files, container, '');
         }
 
         // Update current file indicator
         function updateCurrentFileIndicator() {
-            const indicator = $('#current-file-indicator');
+            const fileName = document.getElementById('floating-file-name');
+            const saveBtn = document.getElementById('save-file-btn');
+
             if (currentFile) {
-                indicator.text('📄 ' + currentFile.path);
+                fileName.textContent = '📄 ' + currentFile.path;
+                saveBtn.style.display = 'block';
+
                 if (unsavedChanges) {
-                    indicator.addClass('unsaved');
+                    fileName.classList.add('unsaved');
+                    saveBtn.textContent = '💾 Save';
+                    saveBtn.classList.remove('saved');
                 } else {
-                    indicator.removeClass('unsaved');
+                    fileName.classList.remove('unsaved');
+                    saveBtn.textContent = '✓ Saved';
+                    saveBtn.classList.add('saved');
+                    // Reset to "Save" after 2 seconds
+                    setTimeout(() => {
+                        if (!unsavedChanges) {
+                            saveBtn.textContent = '💾 Save';
+                            saveBtn.classList.remove('saved');
+                        }
+                    }, 2000);
                 }
             } else {
-                indicator.text('No file open');
-                indicator.removeClass('unsaved');
+                fileName.textContent = 'No file open';
+                saveBtn.style.display = 'none';
+                fileName.classList.remove('unsaved');
             }
         }
 
         // Update active file in tree
         function updateActiveFileInTree() {
-            $('.file-tree-item').removeClass('active');
+            document.querySelectorAll('.file-tree-item').forEach(item => {
+                item.classList.remove('active');
+            });
             if (currentFile) {
-                $('.file-tree-item').each(function() {
-                    const itemText = $(this).text().trim();
-                    const filename = currentFile.path.split('/').pop();
-                    // Use exact match - remove icon and whitespace
-                    const itemName = itemText.replace(/^[📁📄]\s*/, '');
-                    if (itemName === filename) {
-                        $(this).addClass('active');
-                    }
-                });
+                const activeItem = document.querySelector(`.file-tree-item[data-path="${currentFile.path}"]`);
+                if (activeItem) {
+                    activeItem.classList.add('active');
+                }
             }
         }
 
         // Initialize file tree when document is ready
-        $(document).ready(async function() {
-            // Check if server is available
-            const isServerAvailable = await checkServerAvailable();
-            
-            if (isServerAvailable) {
-                console.log('Server mode enabled');
-                await refreshFileTree();
-                updateCurrentFileIndicator();
-                
-                // Setup event handlers
-                $('#new-file-btn').on('click', createNewFile);
-                $('#new-folder-btn').on('click', createNewFolder);
-                $('#refresh-btn').on('click', refreshFileTree);
-                
-                $('#toggle-sidebar').on('click', function() {
-                    $('#file-tree-container').toggleClass('collapsed');
-                    $('body').toggleClass('sidebar-collapsed');
-                });
-                
-                // Track unsaved changes
-                $('#wmd-input').on('input', function() {
-                    if (currentFile) {
-                        unsavedChanges = true;
-                        updateCurrentFileIndicator();
-                    }
-                });
-            } else {
-                console.log('Server not available - using localStorage mode');
-                $('body').removeClass('with-sidebar');
-                $('#file-tree-container').hide();
-                $('#toggle-sidebar').hide();
-                $('#current-file-indicator').hide();
+        async function initFileTree() {
+            try {
+                console.log('Initializing file tree...');
+
+                // Check if server is available
+                const isServerAvailable = await checkServerAvailable();
+                console.log('Server available:', isServerAvailable);
+
+                if (isServerAvailable) {
+                    console.log('Server mode enabled');
+                    await refreshFileTree();
+                    console.log('File tree refreshed');
+                    updateCurrentFileIndicator();
+
+                    // Setup event handlers
+                    document.getElementById('new-file-btn').addEventListener('click', createNewFile);
+                    document.getElementById('new-folder-btn').addEventListener('click', createNewFolder);
+                    document.getElementById('refresh-btn').addEventListener('click', refreshFileTree);
+
+                    document.getElementById('toggle-sidebar').addEventListener('click', function () {
+                        document.getElementById('file-tree-container').classList.toggle('collapsed');
+                        document.body.classList.toggle('sidebar-collapsed');
+                    });
+
+                    // Track unsaved changes
+                    document.getElementById('wmd-input').addEventListener('input', function () {
+                        if (currentFile) {
+                            unsavedChanges = true;
+                            updateCurrentFileIndicator();
+                        }
+                    });
+
+                    // Setup save button
+                    document.getElementById('save-file-btn').addEventListener('click', async function () {
+                        await saveFileToServer();
+                    });
+
+                    console.log('File tree initialization complete');
+                } else {
+                    console.log('Server not available - using localStorage mode');
+                    document.body.classList.remove('with-sidebar');
+                    document.getElementById('file-tree-container').style.display = 'none';
+                    document.getElementById('toggle-sidebar').style.display = 'none';
+                    document.getElementById('current-file-indicator').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error initializing file tree:', error);
             }
-        });
+        }
+
+        // Call initFileTree when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initFileTree);
+        } else {
+            // DOM already loaded
+            initFileTree();
+        }
 
         togglemathjax = function (enabled) {
             if (enabled) {
@@ -1086,7 +1259,9 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
             reader.onload = function (e) {
                 var contents = e.target.result;
                 $('#wmd-input').val(contents);        // display file content
-                editor.refreshPreview();
+                if (editor && editor.refreshPreview !== undefined) {
+                    editor.refreshPreview();
+                }
             };
             reader.readAsText(file);
         }
@@ -1216,14 +1391,21 @@ Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href
         var latexenabled = localStorage.getItem("latex") !== "0";
         var darkmodeenabled = localStorage.getItem("darkmode") !== "0";
         var romanfontenabled = localStorage.getItem("romanfont") !== "0";
-        var converter = Markdown.getSanitizingConverter();
-        Markdown.Extra.init(converter);
-        var editor = new Markdown.Editor(converter, '');
-        var mjpd1 = new mjpd();
-        togglemathjax(latexenabled);
-        toggledarkmode(darkmodeenabled);
-        $('html').toggleClass('texroman', romanfontenabled);
-        editor.run();
+        var converter, editor, mjpd1;
+
+        // Initialize editor when document is ready
+        $(document).ready(function () {
+            console.log('Initializing Markdown editor...');
+            converter = Markdown.getSanitizingConverter();
+            Markdown.Extra.init(converter);
+            editor = new Markdown.Editor(converter, '');
+            mjpd1 = new mjpd();
+            togglemathjax(latexenabled);
+            toggledarkmode(darkmodeenabled);
+            $('html').toggleClass('texroman', romanfontenabled);
+            editor.run();
+            console.log('Markdown editor initialized');
+        });
     </script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-2312083-14"></script>
