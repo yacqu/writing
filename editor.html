@@ -21,6 +21,23 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <title>Writing</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: {
+                preflight: false, // Disable Tailwind's reset to preserve custom styles
+            }
+        }
+    </script>
+    <style type="text/css">
+        /* Custom reset to preserve original behavior */
+        * {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            outline: 0;
+        }
+    </style>
     <style type="text/css">
         @font-face {
             font-family: texroman;
@@ -39,51 +56,45 @@
         }
 
         html {
-            font-family: sans-serif;
-            background-color: #212121;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            border: 0;
-            outline: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
         }
 
         .texroman {
             font-family: texroman !important;
         }
 
-        .unselectable {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-
         .fixedheight {
             height: 100%;
         }
 
-        .column {
-            padding: 20px;
-        }
-
-        #wmd-button-bar {
-            display: none;
+        #wmd-container {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: row;
+            overflow: hidden;
         }
 
         #wmd-input {
             float: left;
             box-sizing: border-box;
             width: 50%;
-            resize: horizontal;
+            resize: none;
             font-size: 14px;
             border-right: 1px solid #ddd;
             height: 100%;
-            overflow: y-scroll;
+            overflow-y: auto;
+        }
+
+        #monaco-editor-container {
+            float: left;
+            box-sizing: border-box;
+            width: 50%;
+            height: 100%;
+            border-right: 1px solid #ddd;
+            display: none;
         }
 
         #wmd-preview {
@@ -92,17 +103,19 @@
             font-size: 15px;
             height: 100%;
             box-sizing: border-box;
-            min-height: 100vh;
-            overflow: auto;
+            float: left;
+            width: 50%;
         }
 
         #wmd-preview.preview-only {
             width: 100%;
             max-width: 80%;
             margin: 0 auto;
+            float: none;
         }
 
-        #wmd-input.editor-only {
+        #wmd-input.editor-only,
+        #monaco-editor-container.editor-only {
             width: 100%;
             max-width: 80%;
             margin: 0 auto;
@@ -110,6 +123,7 @@
             display: block;
             padding-top: 40px;
             border-left: 1px solid #757575;
+            border-right: none;
         }
 
         #wmd-preview li {
@@ -268,10 +282,7 @@
             font-family: sans-serif;
         }
 
-        #openFileInput {
-            position: absolute;
-            display: none;
-        }
+
 
         @media print {
             #helpicon {
@@ -287,6 +298,10 @@
         .dark-mode #wmd-preview {
             background-color: #212121;
             color: #FAFAFA;
+            border-color: #757575;
+        }
+
+        .dark-mode #monaco-editor-container {
             border-color: #757575;
         }
 
@@ -415,6 +430,12 @@
         #width-control {
             position: static;
             display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #width-control.visible {
+            display: flex;
         }
 
         .dark-mode #mode-toggle {
@@ -456,24 +477,23 @@
         }
 
         #file-tree-header {
-            padding: 12px 15px;
+            padding: 12px 15px 12px 50px;
             background-color: #1E1E1E;
             border-bottom: 1px solid #424242;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
         }
 
         #file-tree-title {
             font-weight: 600;
             font-size: 15px;
             letter-spacing: 0.3px;
-            flex: 1;
         }
 
         #file-tree-actions {
             display: flex;
+            flex-wrap: wrap;
             gap: 6px;
         }
 
@@ -481,11 +501,14 @@
             background: transparent;
             border: 1px solid #555;
             color: #E0E0E0;
-            padding: 6px 10px;
+            padding: 8px 12px;
             cursor: pointer;
-            border-radius: 3px;
-            font-size: 13px;
+            border-radius: 4px;
+            font-size: 12px;
             transition: all 0.15s ease;
+            flex: 1;
+            min-width: 60px;
+            text-align: center;
         }
 
         #file-tree-actions button:hover {
@@ -495,6 +518,17 @@
 
         #file-tree-actions button:active {
             background: #333;
+        }
+
+        #toggle-monaco-btn {
+            font-weight: bold;
+            color: #64b5f6 !important;
+            border-color: #64b5f6 !important;
+        }
+
+        #toggle-monaco-btn.active {
+            background-color: #094771 !important;
+            color: #fff !important;
         }
 
         #file-tree {
@@ -555,7 +589,11 @@
         }
 
         #toggle-sidebar {
-            background: transparent;
+            position: fixed;
+            top: 12px;
+            left: 15px;
+            z-index: 20;
+            background: #1E1E1E;
             border: 1px solid #555;
             color: #E0E0E0;
             padding: 5px 9px;
@@ -571,14 +609,14 @@
             border-color: #666;
         }
 
-        .with-sidebar #wmd-input,
-        .with-sidebar #wmd-preview {
+        .with-sidebar #wmd-container {
             margin-left: 280px;
+            width: calc(100vw - 280px);
         }
 
-        .with-sidebar.sidebar-collapsed #wmd-input,
-        .with-sidebar.sidebar-collapsed #wmd-preview {
+        .with-sidebar.sidebar-collapsed #wmd-container {
             margin-left: 0;
+            width: 100vw;
         }
 
         #current-file-indicator {
@@ -688,7 +726,16 @@
     <script type="text/javascript" src="mathjax-editing_writing.js"></script>
     <!-- <script type="text/javascript" src="jspdf.min.js"></script> -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <input id="openFileInput" type="file" />
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+
+    <!-- Application Modules -->
+    <script type="text/javascript" src="js/file-api.js"></script>
+    <script type="text/javascript" src="js/monaco-integration.js"></script>
+    <script type="text/javascript" src="js/editor-modes.js"></script>
+    <script type="text/javascript" src="js/keyboard-shortcuts.js"></script>
+    <script type="text/javascript" src="js/app-init.js"></script>
+
+    <input id="openFileInput" type="file" class="absolute hidden" />
 
     <!-- Floating Save Button -->
     <div id="floating-save-container">
@@ -696,12 +743,14 @@
         <button id="save-file-btn" style="display: none;">💾 Save</button>
     </div>
 
+    <button id="toggle-sidebar" class="select-none" title="Toggle Sidebar">☰</button>
+
     <!-- File Tree Sidebar -->
     <div id="file-tree-container">
         <div id="file-tree-header">
-            <button id="toggle-sidebar" class="unselectable" title="Toggle Sidebar">☰</button>
             <div id="file-tree-title">📁 Files</div>
             <div id="file-tree-actions">
+                <button id="toggle-monaco-btn" title="Toggle Monaco Editor">M</button>
                 <button id="new-file-btn" title="New File">+ File</button>
                 <button id="new-folder-btn" title="New Folder">+ Folder</button>
                 <button id="refresh-btn" title="Refresh">↻</button>
@@ -709,22 +758,25 @@
         </div>
         <div id="file-tree"></div>
     </div>
-    <div id="wmd-button-bar" class="wmd-button-bar"></div>
-    <textarea id="wmd-input" class="column wmd-input" spellcheck="false"></textarea>
-    <div id="wmd-preview" class="column wmd-preview">
-        <noscript>This text editor requires JavaScript.</noscript>
+    <div id="wmd-button-bar" class="wmd-button-bar hidden"></div>
+    <div id="wmd-container" class="wmd-container">
+        <textarea id="wmd-input" class="p-5 wmd-input" spellcheck="false"></textarea>
+        <div id="monaco-editor-container" class="p-5"></div>
+        <div id="wmd-preview" class="p-5 wmd-preview">
+            <noscript>This text editor requires JavaScript.</noscript>
+        </div>
     </div>
-    <div id="helpicon" class="unselectable">?</div>
+    <div id="helpicon" class="select-none">?</div>
     <div id="controls">
         <div id="width-control">
             <label for="width-slider">Width:</label>
             <input type="range" id="width-slider" min="40" max="100" value="80">
             <span id="width-value">80%</span>
         </div>
-        <button id="mode-toggle" class="unselectable">⬚ Split</button>
+        <button id="mode-toggle" class="select-none">⬚ Split</button>
     </div>
     <div id="help">
-        <div id="closeicon" class="unselectable">X</div>
+        <div id="closeicon" class="select-none">X</div>
         <pre>
 <a href="https://github.com/josephernest/writing">Writing</a> is a lightweight distraction-free text editor.
 Write text on the left, and the result is displayed on the right.
@@ -768,645 +820,6 @@ Made by <a href="https://twitter.com/JosephErnest">@JosephErnest</a>
 Uses <a href="https://code.google.com/archive/p/pagedown/">Pagedown</a>, <a href="https://github.com/jmcmanus/pagedown-extra">Pagedown Extra</a>, <a href="https://www.mathjax.org/">MathJax</a>, StackOverflow's <a href="https://gist.github.com/gdalgas/a652bce3a173ddc59f66">editor</a> code and the <a href="http://cm-unicode.sourceforge.net/">Computer Modern</a> font.
 </pre>
     </div>
-
-    <script type="text/javascript">
-        console.log('Main script executing...');
-        console.log('jQuery available:', typeof jQuery !== 'undefined');
-        console.log('$ available:', typeof $ !== 'undefined');
-
-        // File System API Integration
-        const API_BASE = '/api';
-        let currentFile = null;
-        let unsavedChanges = false;
-        let serverMode = false;
-
-        // Check if server is available
-        async function checkServerAvailable() {
-            try {
-                console.log('Checking server availability at:', `${API_BASE}/files`);
-                const response = await fetch(`${API_BASE}/files`);
-                console.log('Server response status:', response.status);
-                serverMode = response.ok;
-                console.log('Server mode:', serverMode);
-                return serverMode;
-            } catch (e) {
-                console.error('Server check failed:', e);
-                serverMode = false;
-                return false;
-            }
-        }
-
-        // Track expanded folders
-        let expandedFolders = new Set();
-
-        // Load file tree from server
-        async function loadFileTree(path = '/') {
-            try {
-                const response = await fetch(`${API_BASE}/files?path=${encodeURIComponent(path)}`);
-                const result = await response.json();
-                if (result.success) {
-                    return result.data.files;
-                }
-            } catch (e) {
-                console.error('Failed to load file tree:', e);
-            }
-            return [];
-        }
-
-        // Render file tree recursively
-        async function renderFileTree(files, container, parentPath = '', indent = 0) {
-            for (const file of files) {
-                // Build the full path for this item
-                const fullPath = parentPath ? `${parentPath}/${file.name}` : `/${file.name}`;
-
-                const item = document.createElement('div');
-                item.className = 'file-tree-item ' + file.type;
-                item.style.paddingLeft = (indent * 20 + 8) + 'px';
-                item.setAttribute('data-path', fullPath);
-
-                if (file.type === 'directory') {
-                    const isExpanded = expandedFolders.has(fullPath);
-                    const arrow = isExpanded ? '▼' : '▶';
-                    item.innerHTML = `<span class="icon">${arrow} 📁</span> ${file.name}`;
-
-                    // Create a container for children
-                    const childContainer = document.createElement('div');
-                    childContainer.className = 'file-tree-children';
-                    if (!isExpanded) {
-                        childContainer.style.display = 'none';
-                    }
-
-                    item.addEventListener('click', async (e) => {
-                        e.stopPropagation();
-
-                        if (expandedFolders.has(fullPath)) {
-                            // Collapse
-                            expandedFolders.delete(fullPath);
-                            item.querySelector('.icon').innerHTML = '▶ 📁';
-                            childContainer.style.display = 'none';
-                        } else {
-                            // Expand
-                            expandedFolders.add(fullPath);
-                            item.querySelector('.icon').innerHTML = '▼ 📁';
-
-                            // Load children if not already loaded
-                            if (childContainer.children.length === 0) {
-                                const children = await loadFileTree(fullPath);
-                                await renderFileTree(children, childContainer, fullPath, indent + 1);
-                            }
-                            childContainer.style.display = 'block';
-                        }
-                    });
-
-                    container.appendChild(item);
-                    container.appendChild(childContainer);
-
-                    // If already expanded, load children
-                    if (isExpanded) {
-                        const children = await loadFileTree(fullPath);
-                        await renderFileTree(children, childContainer, fullPath, indent + 1);
-                    }
-                } else {
-                    // File
-                    item.innerHTML = `<span class="icon">📄</span> ${file.name}`;
-                    item.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        loadFileFromServer(fullPath);
-                    });
-                    container.appendChild(item);
-                }
-            }
-        }
-
-        // Load file content from server
-        async function loadFileFromServer(path) {
-            try {
-                const response = await fetch(`${API_BASE}/file?path=${encodeURIComponent(path)}`);
-                const result = await response.json();
-
-                if (result.success) {
-                    currentFile = {
-                        path: result.data.path,
-                        content: result.data.content,
-                        modified: result.data.modified
-                    };
-                    document.getElementById('wmd-input').value = result.data.content;
-                    if (editor && editor.refreshPreview !== undefined) {
-                        editor.refreshPreview();
-                    }
-                    unsavedChanges = false;
-                    updateCurrentFileIndicator();
-                    updateActiveFileInTree();
-                }
-            } catch (e) {
-                console.error('Failed to load file:', e);
-                alert('Failed to load file: ' + path);
-            }
-        }
-
-        // Validate filename - only allow safe characters
-        function validateFilename(filename) {
-            // Only allow alphanumeric, dash, underscore, dot
-            const safePattern = /^[a-zA-Z0-9._-]+$/;
-            if (!safePattern.test(filename)) {
-                alert('Invalid filename. Only letters, numbers, dash, underscore, and dot are allowed.');
-                return false;
-            }
-            // Prevent path traversal attempts
-            if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
-                alert('Invalid filename. Path separators are not allowed.');
-                return false;
-            }
-            return true;
-        }
-
-        // Save file to server
-        async function saveFileToServer() {
-            if (!currentFile) {
-                // No file open - prompt for filename
-                const filename = prompt('Enter filename (e.g., notes.md):');
-                if (!filename) return;
-                if (!validateFilename(filename)) return;
-                currentFile = { path: '/' + filename };
-            }
-
-            try {
-                const content = document.getElementById('wmd-input').value;
-                const response = await fetch(`${API_BASE}/file`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        path: currentFile.path,
-                        content: content
-                    })
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    unsavedChanges = false;
-                    currentFile.modified = result.data.modified;
-                    updateCurrentFileIndicator();
-                    await refreshFileTree();
-                    console.log('File saved:', currentFile.path);
-                } else {
-                    alert('Failed to save file: ' + result.error);
-                }
-            } catch (e) {
-                console.error('Failed to save file:', e);
-                alert('Failed to save file');
-            }
-        }
-
-        // Create new file
-        async function createNewFile() {
-            const filename = prompt('Enter filename (e.g., notes.md):');
-            if (!filename) return;
-            if (!validateFilename(filename)) return;
-
-            try {
-                const response = await fetch(`${API_BASE}/create`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        path: '/' + filename,
-                        type: 'file'
-                    })
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    await refreshFileTree();
-                    loadFileFromServer('/' + filename);
-                } else {
-                    alert('Failed to create file: ' + result.error);
-                }
-            } catch (e) {
-                console.error('Failed to create file:', e);
-                alert('Failed to create file');
-            }
-        }
-
-        // Create new folder
-        async function createNewFolder() {
-            const foldername = prompt('Enter folder name:');
-            if (!foldername) return;
-            if (!validateFilename(foldername)) return;
-
-            try {
-                const response = await fetch(`${API_BASE}/create`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        path: '/' + foldername,
-                        type: 'directory'
-                    })
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    await refreshFileTree();
-                } else {
-                    alert('Failed to create folder: ' + result.error);
-                }
-            } catch (e) {
-                console.error('Failed to create folder:', e);
-                alert('Failed to create folder');
-            }
-        }
-
-        // Refresh file tree
-        async function refreshFileTree() {
-            const files = await loadFileTree('/');
-            const container = document.getElementById('file-tree');
-            container.innerHTML = '';
-            await renderFileTree(files, container, '');
-        }
-
-        // Update current file indicator
-        function updateCurrentFileIndicator() {
-            const fileName = document.getElementById('floating-file-name');
-            const saveBtn = document.getElementById('save-file-btn');
-
-            if (currentFile) {
-                fileName.textContent = '📄 ' + currentFile.path;
-                saveBtn.style.display = 'block';
-
-                if (unsavedChanges) {
-                    fileName.classList.add('unsaved');
-                    saveBtn.textContent = '💾 Save';
-                    saveBtn.classList.remove('saved');
-                } else {
-                    fileName.classList.remove('unsaved');
-                    saveBtn.textContent = '✓ Saved';
-                    saveBtn.classList.add('saved');
-                    // Reset to "Save" after 2 seconds
-                    setTimeout(() => {
-                        if (!unsavedChanges) {
-                            saveBtn.textContent = '💾 Save';
-                            saveBtn.classList.remove('saved');
-                        }
-                    }, 2000);
-                }
-            } else {
-                fileName.textContent = 'No file open';
-                saveBtn.style.display = 'none';
-                fileName.classList.remove('unsaved');
-            }
-        }
-
-        // Update active file in tree
-        function updateActiveFileInTree() {
-            document.querySelectorAll('.file-tree-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            if (currentFile) {
-                const activeItem = document.querySelector(`.file-tree-item[data-path="${currentFile.path}"]`);
-                if (activeItem) {
-                    activeItem.classList.add('active');
-                }
-            }
-        }
-
-        // Initialize file tree when document is ready
-        async function initFileTree() {
-            try {
-                console.log('Initializing file tree...');
-
-                // Check if server is available
-                const isServerAvailable = await checkServerAvailable();
-                console.log('Server available:', isServerAvailable);
-
-                if (isServerAvailable) {
-                    console.log('Server mode enabled');
-                    await refreshFileTree();
-                    console.log('File tree refreshed');
-                    updateCurrentFileIndicator();
-
-                    // Setup event handlers
-                    document.getElementById('new-file-btn').addEventListener('click', createNewFile);
-                    document.getElementById('new-folder-btn').addEventListener('click', createNewFolder);
-                    document.getElementById('refresh-btn').addEventListener('click', refreshFileTree);
-
-                    document.getElementById('toggle-sidebar').addEventListener('click', function () {
-                        document.getElementById('file-tree-container').classList.toggle('collapsed');
-                        document.body.classList.toggle('sidebar-collapsed');
-                    });
-
-                    // Track unsaved changes
-                    document.getElementById('wmd-input').addEventListener('input', function () {
-                        if (currentFile) {
-                            unsavedChanges = true;
-                            updateCurrentFileIndicator();
-                        }
-                    });
-
-                    // Setup save button
-                    document.getElementById('save-file-btn').addEventListener('click', async function () {
-                        await saveFileToServer();
-                    });
-
-                    console.log('File tree initialization complete');
-                } else {
-                    console.log('Server not available - using localStorage mode');
-                    document.body.classList.remove('with-sidebar');
-                    document.getElementById('file-tree-container').style.display = 'none';
-                    document.getElementById('toggle-sidebar').style.display = 'none';
-                    document.getElementById('current-file-indicator').style.display = 'none';
-                }
-            } catch (error) {
-                console.error('Error initializing file tree:', error);
-            }
-        }
-
-        // Call initFileTree when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initFileTree);
-        } else {
-            // DOM already loaded
-            initFileTree();
-        }
-
-        togglemathjax = function (enabled) {
-            if (enabled) {
-                if (!latexenabledonce) {
-                    MathJax.Hub.Config(
-                        {
-                            "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX", "TeX"], linebreaks: { automatic: true }, EqnChunk: (MathJax.Hub.Browser.isMobile ? 10 : 50) },
-                            tex2jax: { inlineMath: [["$", "$"], ["\\\\(", "\\\\)"]], displayMath: [["$$", "$$"], ["\\[", "\\]"]], processEscapes: true, ignoreClass: "tex2jax_ignore|dno" },
-                            TeX: { noUndefined: { attributes: { mathcolor: "red", mathbackground: "#FFEEEE", mathsize: "90%" } }, Macros: { href: "{}" } },
-                            messageStyle: "none", skipStartupTypeset: true
-                        });
-                    mjpd1.mathjaxEditing.prepareWmdForMathJax(editor, '', [["$", "$"]]);
-                    latexenabledonce = true;
-                    if (editor.refreshPreview !== undefined)
-                        editor.refreshPreview();
-                }
-                else {
-                    MathJax.Hub.queue.pending = 0;
-                    MathJax.Hub.Queue(["Typeset", MathJax.Hub, "wmd-preview"]);
-                }
-            }
-            else {
-                MathJax.Hub.queue.pending = 1;
-                if (editor.refreshPreview !== undefined)
-                    editor.refreshPreview();
-                else {
-                    MathJax.Hub.Config({ skipStartupTypeset: true });
-                }
-            }
-        }
-
-        toggledarkmode = function (enabled) {
-            $('body').toggleClass('dark-mode', enabled);
-        }
-
-        updatePreviewWidth = function (width) {
-            $('#wmd-preview.preview-only').css('max-width', width + '%');
-            $('#width-value').text(width + '%');
-            localStorage.setItem('previewWidth', width);
-        }
-
-        updateEditorWidth = function (width) {
-            $('#wmd-input.editor-only').css('max-width', width + '%');
-            $('#width-value').text(width + '%');
-            localStorage.setItem('editorWidth', width);
-        }
-
-        // Mode labels for the toggle button
-        var modeLabels = ['⬚ Split', '👁 Preview', '✎ Editor'];
-
-        setMode = function (newMode, save) {
-            mode = newMode;
-            if (save !== false) {
-                localStorage.setItem('editorMode', mode);
-            }
-
-            if (mode == 0) {
-                // Split mode
-                $('#wmd-input').show().removeClass('editor-only').css('float', 'left').css('width', '50%').css('max-width', '');
-                $('#wmd-preview').show().removeClass('preview-only').css('max-width', '');
-                $('#width-control').hide();
-                $('body').addClass('fixedheight');
-                $('html').addClass('fixedheight');
-            }
-            else if (mode == 1) {
-                // Preview only
-                $('#wmd-input').hide().removeClass('editor-only');
-                $('#wmd-preview').show().addClass('preview-only');
-                var savedWidth = localStorage.getItem('previewWidth') || 80;
-                $('#wmd-preview').css('max-width', savedWidth + '%');
-                $('#width-slider').val(savedWidth);
-                $('#width-value').text(savedWidth + '%');
-                $('#width-control').show();
-                $('body').removeClass('fixedheight');
-                $('html').removeClass('fixedheight');
-            }
-            else if (mode == 2) {
-                // Editor only
-                $('#wmd-preview').hide().removeClass('preview-only').css('max-width', '');
-                var savedEditorWidth = localStorage.getItem('editorWidth') || 80;
-                $('#wmd-input').show().addClass('editor-only').css('float', 'none').css('width', '100%').css('max-width', savedEditorWidth + '%');
-                $('#width-slider').val(savedEditorWidth);
-                $('#width-value').text(savedEditorWidth + '%');
-                $('#width-control').show();
-                $('body').addClass('fixedheight');
-                $('html').addClass('fixedheight');
-            }
-
-            $('#mode-toggle').text(modeLabels[mode]);
-        }
-
-        cycleMode = function () {
-            var newMode = (mode + 1) % 3;
-            setMode(newMode);
-        }
-
-        // Initialize controls
-        $(document).ready(function () {
-            // Width slider - handles both preview and editor modes
-            $('#width-slider').on('input', function () {
-                var width = $(this).val();
-                if (mode == 1) {
-                    updatePreviewWidth(width);
-                } else if (mode == 2) {
-                    updateEditorWidth(width);
-                }
-            });
-
-            // Mode toggle button
-            $('#mode-toggle').on('click', function () {
-                cycleMode();
-            });
-
-            // Restore saved mode
-            var savedMode = parseInt(localStorage.getItem('editorMode')) || 0;
-            setMode(savedMode, false);
-        });
-
-        if (localStorage.getItem("writing") !== null) {
-            $('#wmd-input').val(localStorage.getItem("writing"));
-        }
-
-        openFile = function (e) {
-            readFile(e.target.files[0]);
-        }
-
-        readFile = function (file) { // https://stackoverflow.com/a/26298948/1422096
-            if (!file) {
-                return;
-            }
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                var contents = e.target.result;
-                $('#wmd-input').val(contents);        // display file content
-                if (editor && editor.refreshPreview !== undefined) {
-                    editor.refreshPreview();
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        document.getElementById('openFileInput').addEventListener('change', openFile, false);
-
-        $('body').on('drag dragstart dragend dragover dragenter dragleave drop', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-        })
-            .on('drop', function (e) {
-                readFile(e.originalEvent.dataTransfer.files[0]);
-            });
-
-        $('#wmd-input').on('input', function () {
-            if (!serverMode) {
-                localStorage.setItem("writing", $('#wmd-input').val());
-            }
-        });
-
-        $('#wmd-input').focus();
-
-        $('#helpicon').click(function (e) {
-            e.stopPropagation();
-            $('#help').show();
-        });
-
-        $('#help').click(function (e) {
-            e.stopPropagation();
-        });
-
-        $(document).click(function () {
-            $('#help').hide();
-        });
-
-        $(document).on('keydown', function (e) {
-            if (e.keyCode == 80 && (e.ctrlKey || e.metaKey)) {    // CTRL + P 
-                if (mode != 1) {
-                    mode = 1;
-                    $('#wmd-input').hide();
-                    $('#wmd-preview').show();
-                    $('body').removeClass('fixedheight');
-                    $('html').removeClass('fixedheight');
-                    toggledarkmode(false);
-                    e.preventDefault();
-                    window.print();
-                    toggledarkmode(darkmodeenabled);
-                    return false;
-                }
-                //var doc = new jsPDF();
-                //var specialElementHandlers = {'#editor': function (element, renderer) { return true; } };
-                //doc.fromHTML($('#wmd-preview').html(), 15, 15, { 'width': 170, 'elementHandlers': specialElementHandlers });
-                //doc.save('file.pdf');
-                /*var restorepage = $('body').html();
-                var printcontent = $('#wmd-preview').clone();
-                $('body').empty().html(printcontent);
-                window.print();
-                $('body').html(restorepage);
-                e.preventDefault();
-                return false;*/
-            }
-            else if (e.keyCode == 83 && (e.ctrlKey || e.metaKey)) {    // CTRL + S
-                if (serverMode) {
-                    // Save to server
-                    saveFileToServer();
-                } else {
-                    // Download as file (original behavior)
-                    var blob = new Blob([$('#wmd-input').val()], { type: 'text' });     // https://stackoverflow.com/a/33542499/1422096
-                    if (window.navigator.msSaveOrOpenBlob) {
-                        window.navigator.msSaveBlob(blob, 'newfile.md');
-                    }
-                    else {
-                        var elem = window.document.createElement('a');
-                        elem.href = window.URL.createObjectURL(blob);
-                        elem.download = 'newfile.md';
-                        document.body.appendChild(elem);
-                        elem.click();
-                        document.body.removeChild(elem);
-                    }
-                }
-                e.preventDefault();
-                return false;
-            }
-            else if (e.keyCode == 68 && (e.ctrlKey || e.metaKey) && !e.shiftKey) {    // CTRL + D
-                cycleMode();
-                e.preventDefault();
-                return false;
-            }
-            else if (e.keyCode == 72 && (e.ctrlKey || e.metaKey) && e.shiftKey) {    // CTRL + H
-                $('#help').show();
-                e.preventDefault();
-                return false;
-            }
-            else if (e.keyCode == 68 && (e.ctrlKey || e.metaKey) && e.shiftKey) {    // CTRL + SHIFT + D
-                darkmodeenabled = !darkmodeenabled;
-                localStorage.setItem("darkmode", darkmodeenabled ? "1" : "0");
-                toggledarkmode(darkmodeenabled);
-                e.preventDefault();
-                return false;
-            }
-            else if (e.keyCode == 82 && (e.ctrlKey || e.metaKey) && e.shiftKey) {    // CTRL + SHIFT + R
-                var isRoman = $('html').toggleClass('texroman').hasClass('texroman');
-                localStorage.setItem("romanfont", isRoman ? "1" : "0");
-                e.preventDefault();
-                return false;
-            }
-            else if (e.keyCode == 76 && (e.ctrlKey || e.metaKey) && e.shiftKey) {    // CTRL + SHIFT + L 
-                latexenabled = !latexenabled;
-                localStorage.setItem("latex", latexenabled ? "1" : "0");
-                togglemathjax(latexenabled);
-                e.preventDefault();
-                return false;
-            }
-            else if (e.keyCode == 79 && (e.ctrlKey || e.metaKey) && e.shiftKey) {    // CTRL + SHIFT + O
-                $('#openFileInput').click();
-                e.preventDefault();
-                return false;
-            }
-            else if (e.keyCode == 27) { // ESC
-                $('#help').hide();
-            }
-        });
-
-        var mode = 0;
-        var modeInitialized = false;
-        var latexenabledonce = false;
-        var latexenabled = localStorage.getItem("latex") !== "0";
-        var darkmodeenabled = localStorage.getItem("darkmode") !== "0";
-        var romanfontenabled = localStorage.getItem("romanfont") !== "0";
-        var converter, editor, mjpd1;
-
-        // Initialize editor when document is ready
-        $(document).ready(function () {
-            console.log('Initializing Markdown editor...');
-            converter = Markdown.getSanitizingConverter();
-            Markdown.Extra.init(converter);
-            editor = new Markdown.Editor(converter, '');
-            mjpd1 = new mjpd();
-            togglemathjax(latexenabled);
-            toggledarkmode(darkmodeenabled);
-            $('html').toggleClass('texroman', romanfontenabled);
-            editor.run();
-            console.log('Markdown editor initialized');
-        });
-    </script>
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-2312083-14"></script>
     <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'UA-2312083-14');</script>
